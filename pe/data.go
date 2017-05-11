@@ -1,5 +1,7 @@
 package pe
 
+import "time"
+
 /*
 Process struct introduction
 */
@@ -49,3 +51,9 @@ type RequestResource struct {
 
 // RequestResArr is type array of RequestResource
 type RequestResArr []RequestResource
+
+// Running is on behalf of a process which status is "running"
+type Running struct {
+	Process Process
+	Start   time.Time
+}

@@ -4,30 +4,6 @@ import "log"
 
 // 进程有一个写入blocked队列或执行（输出到running队列）的函数
 
-// 检测进程的所有资源是否都已准备好
-func (p *Process) detectAllResourceStatus() bool {
-	for i := 0; i < len(p.RequestResArr); i++ {
-		if p.RequestResArr[i].OK == false {
-			return false
-		}
-		continue
-	}
-	log.Printf("%s has requested all resources!", p.Name)
-	return true
-}
-
-// 从就绪队列中移除
-func (p *Process) removeFromReadyQueue(readyQueue Queue) Queue {
-	for k, v := range readyQueue {
-		if p.Name == v.Name {
-			r := readyQueue[:k]
-			l := readyQueue[k+1:]
-			readyQueue = append(r, l...)
-		}
-	}
-	return readyQueue
-}
-
 // RequestResource lets process request resources
 func (p *Process) RequestResource(rp ResourcePool, readyQueues QueuesArr) (ResourcePool, QueuesArr) {
 	for i := 0; i < len(p.RequestResArr); i++ {

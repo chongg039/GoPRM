@@ -11,7 +11,7 @@ func (p *Process) running() {
 }
 
 // 判定资源池中是否有某进程仍在某资源的blocked队列中
-func (rp ResourcePool) detectBlockedQueue(p Process) bool {
+func (p Process) detectBlockedQueue(rp ResourcePool) bool {
 	for i := 0; i < len(p.RequestResArr); i++ {
 		for j := 0; j < len(rp); j++ {
 			for k := 0; k < len(rp[j].BlockedList); k++ {
@@ -53,7 +53,7 @@ func (p *Process) ReleaseResource(rp ResourcePool, finishedQueue Queue) (Resourc
 					if rp[j].Available > 0 && len(rp[j].BlockedList) > 0 {
 						rp[j].Available--
 						//　检测所有blocked队列
-						judge := rp.detectBlockedQueue(*p)
+						judge := p.detectBlockedQueue(rp)
 						if judge == false {
 							rp[j].BlockedList[0].Status = "finished"
 							finishedQueue = append(finishedQueue, rp[j].BlockedList[0])
