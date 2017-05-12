@@ -6,13 +6,13 @@ import "log"
 
 // RequestResource lets process request resources
 func (p *PCB) RequestResource(rcbPool RCBPool, pcbPool PCBPool) (RCBPool, PCBPool) {
-	for i := 0; i < len(p.RequestResArr); i++ {
+	for i := 0; i < len(p.ReqResArr); i++ {
 		for j := 0; j < len(rcbPool); j++ {
 
-			if rcbPool[j].Name == p.RequestResArr[i].Name && rcbPool[j].Available > 0 {
+			if rcbPool[j].Name == p.ReqResArr[i].Name && rcbPool[j].Available > 0 {
 				rcbPool[j].Available--
-				p.RequestResArr[i].OK = true
-				log.Printf("%s request resource %s OK!", p.Name, p.RequestResArr[i].Name)
+				p.ReqResArr[i].OK = true
+				log.Printf("%s request resource %s OK!", p.Name, p.ReqResArr[i].Name)
 
 				// judge := p.detectAllResourceStatus()
 				// if judge == true {
@@ -27,8 +27,8 @@ func (p *PCB) RequestResource(rcbPool RCBPool, pcbPool PCBPool) (RCBPool, PCBPoo
 				// 	return rp, finishedQueue, readyQueues
 				// }
 				break
-			} else if rcbPool[j].Name == p.RequestResArr[i].Name && rcbPool[j].Available == 0 {
-				log.Printf("no available %s resource, add to waiting list", p.RequestResArr[i].Name)
+			} else if rcbPool[j].Name == p.ReqResArr[i].Name && rcbPool[j].Available == 0 {
+				log.Printf("no available %s resource, add to waiting list", p.ReqResArr[i].Name)
 				// 从就绪队列中删除
 				pcbPool[p.Priority] = p.removeFromReadyQueue(pcbPool[p.Priority])
 				// 插入某资源的waitinglist

@@ -37,8 +37,8 @@ Check:
 
 // 检测进程的所有资源是否都已准备好
 func (p *PCB) detectAllResourceStatus() bool {
-	for i := 0; i < len(p.RequestResArr); i++ {
-		if p.RequestResArr[i].OK == false {
+	for i := 0; i < len(p.ReqResArr); i++ {
+		if p.ReqResArr[i].OK == false {
 			return false
 		}
 		continue
