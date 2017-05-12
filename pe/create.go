@@ -5,10 +5,20 @@ import (
 	"time"
 )
 
+// CreateRCB initialize resource
+func CreateRCB(name string, t int) *RCB {
+	return &RCB{
+		Name:        name,
+		Total:       t,
+		Available:   t,
+		BlockedList: Queue{},
+	}
+}
+
 /*
-CreateProcess means create a process
+CreatePCB means create a process
 */
-func (p *PCB) CreateProcess(name string, level int, rname ...string) PCB {
+func CreatePCB(name string, level int) *PCB {
 	const (
 		status string = "ready"
 		cpu    string = "notused"
@@ -18,36 +28,31 @@ func (p *PCB) CreateProcess(name string, level int, rname ...string) PCB {
 
 	pid := generateRandomPID()
 
-	p.Name = name
-	p.PID = pid
-	p.Status = status
-	p.Priority = level
-	p.CPUState = cpu
-	p.Memory = memory
+	// var rs RequestResource
 
-	var rs RequestResource
-
-	// if len(rname) == 0 {
-	// 	rs.Name = "no resource needed"
-	// 	rs.OK = true
-	// 	p.RequestResArr = append(p.RequestResArr, rs)
-	// } else {
-	for i := 0; i < len(rname); i++ {
-		rs.Name = rname[i]
-		rs.OK = false
-		p.RequestResArr = append(p.RequestResArr, rs)
-	}
+	// for i := 0; i < len(rname); i++ {
+	// 	rs.Name = rname[i]
+	// 	rs.OK = false
+	// 	p.RequestResArr = append(p.RequestResArr, rs) // 添加请求数组应该在request函数中进行
 	// }
 
 	// append new created process to the ready queue
 	// readyqueue = append(readyqueue, *p)
-	return *p
+	return &PCB{
+		Name:      name,
+		PID:       pid,
+		Status:    status,
+		Priority:  level,
+		CPUState:  cpu,
+		Memory:    memory,
+		ReqResArr: []RequestResource{},
+	}
 }
 
 // InsertSortedQueue replace method "append"
 func (p *PCB) InsertSortedQueue(pcbPool PCBPool) PCBPool {
 
-	pcb[p.Priority] = append(pcb[p.Priority], *p)
+	pcbPool[p.Priority] = append(pcbPool[p.Priority], *p)
 
 	return pcbPool
 }

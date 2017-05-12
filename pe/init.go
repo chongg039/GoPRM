@@ -1,39 +1,46 @@
 package pe
 
-// InitPCB create queues array consist of queue which process's status is "ready"
+// InitPCBPool create queues array consist of queue which process's status is "ready"
 // and priority is of 0, 1, 2
-func (p *PCB) InitPCB() (pcbPool PCBPool) {
-	return
+func (p *PCB) InitPCBPool() *PCBPool {
+	var pcbPool PCBPool
+	return &pcbPool
 }
 
-// InitResource initialize resource
-func (r *RCB) InitResource(name string, t int) RCB {
-	r.Name = name
-	r.Total = t
-	r.Available = t
-
-	return *r
-}
-
-// InitRCB consist of resources
-func (rcbPool *RCBPool) InitRCB(rs ...RCB) RCBPool {
-	*rcbPool = rs
-	return *rcbPool
+// InitRCBPool consist of resources
+func InitRCBPool(rs ...RCB) *RCBPool {
+	var rcbPool RCBPool = rs
+	return &rcbPool
 }
 
 // 建立 running 输出队列
 
 // blocked 队列在分别对应的 resource 中
 
-// InitProcess should be used when start, and it creates a "Init" process
-func (p *PCB) InitProcess(name string) (pcbPool PCBPool) {
-	const level int = 0
+// Init 创建初始进程和R1，R2，R3，R4四种资源，并返回PCB池和RCB池的地址
+func Init() (*PCBPool, *RCBPool) {
+	const (
+		level int    = 0
+		name  string = "InitPCB"
+	)
 
-	pcbPool = p.InitPCB()
+	// 初始化Init进程
+	initPCB := CreatePCB(name, level)
 
-	proc := p.CreateProcess(name, level, "R1")
+	// 初始化PCB池
+	pcbPool := initPCB.InitPCBPool()
 
-	pcbPool[proc.Priority] = append(pcbPool[p.Priority], proc)
+	// 将Init进程放入进程池
+	pcbPool[initPCB.Priority] = append(pcbPool[initPCB.Priority], *initPCB)
 
-	return
+	// 建立四个资源R1，R2，R3，R4
+	R1 := CreateRCB("R1", 1)
+	R2 := CreateRCB("R2", 2)
+	R3 := CreateRCB("R3", 3)
+	R4 := CreateRCB("R4", 4)
+
+	// 初始化RCB池
+	rcbPool := InitRCBPool(*R1, *R2, *R3, *R4)
+
+	return pcbPool, rcbPool
 }

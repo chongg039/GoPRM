@@ -19,7 +19,7 @@ type PCB struct {
 	// when status is "running" memory is "using", others are "not used"
 	Memory string `json:"Memory"`
 	// ResourceArr means process needed resources
-	RequestResArr RequestResArr `json:"RequestResArr"`
+	ReqResArr []RequestResource `json:"ReqResArr"`
 }
 
 // Queue of PCB
@@ -50,7 +50,7 @@ type RequestResource struct {
 }
 
 // RequestResArr is type array of RequestResource
-type RequestResArr []RequestResource
+// type RequestResArr []RequestResource
 
 // Running is on behalf of a process which status is "running"
 type Running struct {
