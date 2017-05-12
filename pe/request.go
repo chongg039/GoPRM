@@ -5,12 +5,12 @@ import "log"
 // 进程有一个写入blocked队列或执行（输出到running队列）的函数
 
 // RequestResource lets process request resources
-func (p *Process) RequestResource(rp ResourcePool, readyQueues QueuesArr) (ResourcePool, QueuesArr) {
+func (p *PCB) RequestResource(rcbPool RCBPool, pcbPool PCBPool) (RCBPool, PCBPool) {
 	for i := 0; i < len(p.RequestResArr); i++ {
-		for j := 0; j < len(rp); j++ {
+		for j := 0; j < len(rcbPool); j++ {
 
-			if rp[j].Name == p.RequestResArr[i].Name && rp[j].Available > 0 {
-				rp[j].Available--
+			if rcbPool[j].Name == p.RequestResArr[i].Name && rcbPool[j].Available > 0 {
+				rcbPool[j].Available--
 				p.RequestResArr[i].OK = true
 				log.Printf("%s request resource %s OK!", p.Name, p.RequestResArr[i].Name)
 
@@ -27,20 +27,20 @@ func (p *Process) RequestResource(rp ResourcePool, readyQueues QueuesArr) (Resou
 				// 	return rp, finishedQueue, readyQueues
 				// }
 				break
-			} else if rp[j].Name == p.RequestResArr[i].Name && rp[j].Available == 0 {
+			} else if rcbPool[j].Name == p.RequestResArr[i].Name && rcbPool[j].Available == 0 {
 				log.Printf("no available %s resource, add to waiting list", p.RequestResArr[i].Name)
 				// 从就绪队列中删除
-				readyQueues[p.Priority] = p.removeFromReadyQueue(readyQueues[p.Priority])
+				pcbPool[p.Priority] = p.removeFromReadyQueue(pcbPool[p.Priority])
 				// 插入某资源的waitinglist
 				p.Status = "blocked"
-				rp[j].BlockedList = append(rp[j].BlockedList, *p)
+				rcbPool[j].BlockedList = append(rcbPool[j].BlockedList, *p)
 				// 从ready队列中移除
-				return rp, readyQueues
+				return rcbPool, pcbPool
 			} else {
 				continue
 			}
 		}
 		// 应该设置标志位判断请求是否合法
 	}
-	return rp, readyQueues
+	return rcbPool, pcbPool
 }

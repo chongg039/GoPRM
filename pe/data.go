@@ -3,9 +3,9 @@ package pe
 import "time"
 
 /*
-Process struct introduction
+PCB struct introduction
 */
-type Process struct {
+type PCB struct {
 	// name
 	Name string `json:"ProcName"`
 	// PID
@@ -22,14 +22,14 @@ type Process struct {
 	RequestResArr RequestResArr `json:"RequestResArr"`
 }
 
-// Queue of process
-type Queue []Process
+// Queue of PCB
+type Queue []PCB
 
-// QueuesArr consist of 0, 1, 2 Queue
-type QueuesArr [3]Queue
+// PCBPool consist of 0, 1, 2 Queue
+type PCBPool [3]Queue
 
-// Resource control block
-type Resource struct {
+// RCB control block
+type RCB struct {
 	// source name: R1, R2, R3, R4
 	Name string
 	// initial number
@@ -40,8 +40,8 @@ type Resource struct {
 	BlockedList Queue
 }
 
-// ResourcePool consist of resources
-type ResourcePool []Resource
+// RCBPool consist of resources
+type RCBPool []RCB
 
 // RequestResource is one process needed resource
 type RequestResource struct {
@@ -54,6 +54,6 @@ type RequestResArr []RequestResource
 
 // Running is on behalf of a process which status is "running"
 type Running struct {
-	Process Process
+	Process PCB
 	Start   time.Time
 }

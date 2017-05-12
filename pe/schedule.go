@@ -8,26 +8,26 @@ import (
 // 在每个优先级ready队列中使用时间片轮转
 
 // TimeRotation is used in each priority's ready queue
-func (rqa *QueuesArr) TimeRotation() {
-	for i := len(rqa) - 1; i >= 0; i-- {
-		rqa[i] = append(rqa[i][1:], rqa[i][0])
+func (pcbPool *PCBPool) TimeRotation() {
+	for i := len(pcbPool) - 1; i >= 0; i-- {
+		pcbPool[i] = append(pcbPool[i][1:], pcbPool[i][0])
 	}
 }
 
 // Schedule is based on priority 0, 1, 2
 // 返回running运行时的指针地址，没有的话为nil
-func (rqa *QueuesArr) Schedule() *Running {
+func (pcbPool *PCBPool) Schedule() *Running {
 	var running Running
 Check:
 	for priority := 2; priority >= 0; priority-- {
-		for i := 0; i < len(rqa[priority]); i++ {
+		for i := 0; i < len(pcbPool[priority]); i++ {
 			// 所有资源准备就绪
-			if rqa[priority][i].detectAllResourceStatus() == true {
+			if pcbPool[priority][i].detectAllResourceStatus() == true {
 				start := time.Now()
-				rqa[priority][i].Status = "running"
-				running = Running{rqa[priority][i], start}
+				pcbPool[priority][i].Status = "running"
+				running = Running{pcbPool[priority][i], start}
 				// 从原队列中移除
-				rqa[priority] = append(rqa[priority][:i], rqa[priority][i+1:]...)
+				pcbPool[priority] = append(pcbPool[priority][:i], pcbPool[priority][i+1:]...)
 				break Check
 			}
 		}
@@ -36,7 +36,7 @@ Check:
 }
 
 // 检测进程的所有资源是否都已准备好
-func (p *Process) detectAllResourceStatus() bool {
+func (p *PCB) detectAllResourceStatus() bool {
 	for i := 0; i < len(p.RequestResArr); i++ {
 		if p.RequestResArr[i].OK == false {
 			return false
@@ -47,14 +47,14 @@ func (p *Process) detectAllResourceStatus() bool {
 	return true
 }
 
-// 从就绪队列中移除
-func (p *Process) removeFromReadyQueue(readyQueue Queue) Queue {
-	for k, v := range readyQueue {
+// 从队列中移除
+func (p *PCB) removeFromReadyQueue(queue Queue) Queue {
+	for k, v := range queue {
 		if p.Name == v.Name {
-			r := readyQueue[:k]
-			l := readyQueue[k+1:]
-			readyQueue = append(r, l...)
+			r := queue[:k]
+			l := queue[k+1:]
+			queue = append(r, l...)
 		}
 	}
-	return readyQueue
+	return queue
 }

@@ -1,13 +1,13 @@
 package pe
 
-// InitReadyQueuesArr create queues array consist of queue which process's status is "ready"
+// InitPCB create queues array consist of queue which process's status is "ready"
 // and priority is of 0, 1, 2
-func (p *Process) InitReadyQueuesArr() (readyQueuesArr QueuesArr) {
+func (p *PCB) InitPCB() (pcbPool PCBPool) {
 	return
 }
 
 // InitResource initialize resource
-func (r *Resource) InitResource(name string, t int) Resource {
+func (r *RCB) InitResource(name string, t int) RCB {
 	r.Name = name
 	r.Total = t
 	r.Available = t
@@ -15,10 +15,10 @@ func (r *Resource) InitResource(name string, t int) Resource {
 	return *r
 }
 
-// InitResourcePool consist of resources
-func (rp *ResourcePool) InitResourcePool(rs ...Resource) ResourcePool {
-	*rp = rs
-	return *rp
+// InitRCB consist of resources
+func (rcbPool *RCBPool) InitRCB(rs ...RCB) RCBPool {
+	*rcbPool = rs
+	return *rcbPool
 }
 
 // 建立 running 输出队列
@@ -26,14 +26,14 @@ func (rp *ResourcePool) InitResourcePool(rs ...Resource) ResourcePool {
 // blocked 队列在分别对应的 resource 中
 
 // InitProcess should be used when start, and it creates a "Init" process
-func (p *Process) InitProcess(name string) (readyQueuesArr QueuesArr) {
+func (p *PCB) InitProcess(name string) (pcbPool PCBPool) {
 	const level int = 0
 
-	readyQueuesArr = p.InitReadyQueuesArr()
+	pcbPool = p.InitPCB()
 
 	proc := p.CreateProcess(name, level, "R1")
 
-	readyQueuesArr[proc.Priority] = append(readyQueuesArr[p.Priority], proc)
+	pcbPool[proc.Priority] = append(pcbPool[p.Priority], proc)
 
 	return
 }
