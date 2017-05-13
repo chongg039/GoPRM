@@ -24,39 +24,39 @@ func (rcbPool *RCBPool) detectBlockedQueue(p *PCB) bool {
 	return false
 }
 
-func (blockedQueue *Queue) removeFromBlockedQueue(p *PCB) {
-	for k, v := range *blockedQueue {
-		if p.Name == v.Name {
-			r := (*blockedQueue)[:k]
-			l := (*blockedQueue)[k+1:]
-			*blockedQueue = append(r, l...)
-		}
-	}
-}
+// func (blockedQueue *Queue) removeFromBlockedQueue(p *PCB) {
+// 	for k, v := range *blockedQueue {
+// 		if p.Name == v.Name {
+// 			r := (*blockedQueue)[:k]
+// 			l := (*blockedQueue)[k+1:]
+// 			*blockedQueue = append(r, l...)
+// 		}
+// 	}
+// }
 
 // ReleaseResource should be used when process is already running
 // 每次释放资源resource检测自身是否可用（>0），并从blocked队列中取出放入running
-func (p *PCB) ReleaseResource(rcbPool RCBPool, finishedQueue Queue) (RCBPool, Queue) {
+func (p *PCB) ReleaseResource(rcbPool *RCBPool, finishedQueue *Queue) (*RCBPool, *Queue) {
 	for i := 0; i < len(p.ReqResArr); i++ {
-		for j := 0; j < len(rcbPool); j++ {
-			if p.ReqResArr[i].Name == rcbPool[j].Name {
-				rcbPool[j].Available++
-				log.Printf("%s Already release resource, %s", p.Name, rcbPool[j].Name)
+		for j := 0; j < len(*rcbPool); j++ {
+			if p.ReqResArr[i].Name == (*rcbPool)[j].Name {
+				(*rcbPool)[j].Available++
+				log.Printf("%s Already release resource, %s", p.Name, (*rcbPool)[j].Name)
 
 				if i == len(p.ReqResArr)-1 {
 					p.Status = "finished"
-					finishedQueue = append(finishedQueue, *p)
+					*finishedQueue = append(*finishedQueue, *p)
 					log.Printf("Process %s has already finished, put it to finished queue", p.Name)
 
 					// 检测该blocked队列
-					if rcbPool[j].Available > 0 && len(rcbPool[j].BlockedList) > 0 {
-						rcbPool[j].Available--
+					if (*rcbPool)[j].Available > 0 && len((*rcbPool)[j].BlockedList) > 0 {
+						(*rcbPool)[j].Available--
 						//　检测所有blocked队列
 						judge := rcbPool.detectBlockedQueue(p)
 						if judge == false {
-							rcbPool[j].BlockedList[0].Status = "finished"
-							finishedQueue = append(finishedQueue, rcbPool[j].BlockedList[0])
-							rcbPool[j].BlockedList.removeFromBlockedQueue(&(rcbPool[j].BlockedList[0]))
+							(*rcbPool)[j].BlockedList[0].Status = "finished"
+							*finishedQueue = append(*finishedQueue, (*rcbPool)[j].BlockedList[0])
+							(*rcbPool)[j].BlockedList = (*rcbPool)[j].BlockedList[1:]
 						}
 					}
 					return rcbPool, finishedQueue

@@ -60,13 +60,13 @@ func (p *PCB) detectAllResourceStatus() bool {
 }
 
 // 从队列中移除
-func (p *PCB) removeFromReadyQueue(queue Queue) Queue {
-	for k, v := range queue {
-		if p.Name == v.Name {
-			r := queue[:k]
-			l := queue[k+1:]
-			queue = append(r, l...)
-		}
-	}
-	return queue
-}
+// func (p *PCB) removeFromReadyQueue(queue Queue) Queue {
+// 	for k, v := range queue {
+// 		if p.Name == v.Name {
+// 			r := queue[:k]
+// 			l := queue[k+1:]
+// 			queue = append(r, l...)
+// 		}
+// 	}
+// 	return queue
+// }
