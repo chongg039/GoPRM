@@ -45,7 +45,7 @@ func Init() (*PCBPool, *RCBPool, *Queue, *Running) {
 	pcbPool := initPCB.InitPCBPool()
 
 	// 将Init进程放入进程池
-	pcbPool[initPCB.Priority] = append(pcbPool[initPCB.Priority], *initPCB)
+	pcbPool.AppendPCBEle(initPCB)
 
 	// 建立四个资源R1，R2，R3，R4
 	R1 := CreateRCB("R1", 1)

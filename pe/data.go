@@ -26,11 +26,23 @@ type PCB struct {
 	children []interface{}
 }
 
-// Queue of PCB
-type Queue []PCB
+// PCBEle means node of PCB in PCBLinkList
+type PCBEle struct {
+	Data PCB
+	next *PCBEle
+}
+
+// PCBLinkList is a linklist of PCBEle
+type PCBLinkList struct {
+	length int
+	head   *PCBEle
+}
 
 // PCBPool consist of 0, 1, 2 Queue
-type PCBPool [3]Queue
+type PCBPool [3]PCBLinkList
+
+// Queue consist of finished PCB
+type Queue []PCB
 
 // RCB control block
 type RCB struct {

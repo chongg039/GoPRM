@@ -4,6 +4,14 @@ GoPRM is a process resource manager written by golang.
 
 Created by coldriver, 2017.05.02.
 
+ struct:
+ - 就绪（ready）队列是关于PCB的单向链表PCBLinkList，就绪池（PCBPool）是关于就绪队列的一维三元数组
+ - 每个资源（resource）中有该资源的阻塞（blocked）队列，是关于PCB的一维切片/数组
+ - 资源池（RCBPool）是关于RCB的一维切片/数组
+ - 进行（running）块，是关于正在运行的进程的数据结构
+ - 完成（finish）队列是关于已完成PCB的一维切片/数组
+ - 撤销（destroy）队列是关于已撤销PCB的一维切片/数组
+
  Init：
  - 系统初始化Init进程PCB，优先级设为0
  - 系统初始化四种资源R1，R2，R3，R4的四个RCB

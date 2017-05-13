@@ -11,7 +11,7 @@ func (p *PCB) running() {
 }
 
 // 判定资源池中是否有某进程仍在某资源的blocked队列中
-func (rcbPool *RCBPool) detectBlockedQueue(p PCB) bool {
+func (rcbPool *RCBPool) detectBlockedQueue(p *PCB) bool {
 	for i := 0; i < len(p.ReqResArr); i++ {
 		for j := 0; j < len(*rcbPool); j++ {
 			for k := 0; k < len((*rcbPool)[j].BlockedList); k++ {
@@ -24,15 +24,14 @@ func (rcbPool *RCBPool) detectBlockedQueue(p PCB) bool {
 	return false
 }
 
-func (p *PCB) removeFromBlockedQueue(blockedQueue Queue) Queue {
-	for k, v := range blockedQueue {
+func (blockedQueue *Queue) removeFromBlockedQueue(p *PCB) {
+	for k, v := range *blockedQueue {
 		if p.Name == v.Name {
-			r := blockedQueue[:k]
-			l := blockedQueue[k+1:]
-			blockedQueue = append(r, l...)
+			r := (*blockedQueue)[:k]
+			l := (*blockedQueue)[k+1:]
+			*blockedQueue = append(r, l...)
 		}
 	}
-	return blockedQueue
 }
 
 // ReleaseResource should be used when process is already running
@@ -53,11 +52,11 @@ func (p *PCB) ReleaseResource(rcbPool RCBPool, finishedQueue Queue) (RCBPool, Qu
 					if rcbPool[j].Available > 0 && len(rcbPool[j].BlockedList) > 0 {
 						rcbPool[j].Available--
 						//　检测所有blocked队列
-						judge := rcbPool.detectBlockedQueue(*p)
+						judge := rcbPool.detectBlockedQueue(p)
 						if judge == false {
 							rcbPool[j].BlockedList[0].Status = "finished"
 							finishedQueue = append(finishedQueue, rcbPool[j].BlockedList[0])
-							rcbPool[j].BlockedList = rcbPool[j].BlockedList[0].removeFromBlockedQueue(rcbPool[j].BlockedList)
+							rcbPool[j].BlockedList.removeFromBlockedQueue(&(rcbPool[j].BlockedList[0]))
 						}
 					}
 					return rcbPool, finishedQueue

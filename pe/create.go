@@ -40,12 +40,44 @@ func (p *PCB) CreatePCB(name string, level int) *PCB {
 	}
 }
 
-// InsertSortedQueue replace method "append"
-func (p *PCB) InsertSortedQueue(pcbPool *PCBPool) *PCBPool {
+// AppendPCBEle replace method "append"
+func (pcbPool *PCBPool) AppendPCBEle(p *PCB) {
 
-	pcbPool[p.Priority] = append(pcbPool[p.Priority], *p)
+	var pcbele *PCBEle
+	pcbele = new(PCBEle)
+	pcbele.Data = *p
 
-	return pcbPool
+	if pcbPool[p.Priority].head == nil {
+		for pcbPool[p.Priority].head.next != nil {
+			pcbPool[p.Priority].head = pcbPool[p.Priority].head.next
+		}
+		pcbPool[p.Priority].head.next = pcbele
+	}
+	pcbPool[p.Priority].length++
+
+}
+
+// RemovePCBEle remove PCB ele from PCBPool
+func (pcbPool *PCBPool) RemovePCBEle(p *PCB) bool {
+	//n为当前节点，h为前一个节点，初始状态为同一个节点
+	var h, n = pcbPool[p.Priority].head, pcbPool[p.Priority].head
+
+	if pcbPool[p.Priority].head == n && n.Data.Name == p.Name {
+		pcbPool[p.Priority].head = pcbPool[p.Priority].head.next
+		pcbPool[p.Priority].length--
+		return true
+	}
+	for n != nil {
+		if n.Data.Name == p.Name {
+			//由于有垃圾回收，所以不用考虑释放内存
+			h.next = n.next
+			pcbPool[p.Priority].length--
+			return true
+		}
+		h = n
+		n = n.next
+	}
+	return false
 }
 
 // generateRandomPID gets the PID in the range of 2000~15000

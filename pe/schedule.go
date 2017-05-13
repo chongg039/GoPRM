@@ -10,7 +10,16 @@ import (
 // TimeRotation is used in each priority's ready queue
 func (pcbPool *PCBPool) TimeRotation() {
 	for i := len(pcbPool) - 1; i >= 0; i-- {
-		pcbPool[i] = append(pcbPool[i][1:], pcbPool[i][0])
+		if pcbPool[i].head == nil {
+			return
+		}
+		h := pcbPool[i].head.Data
+
+		pcbPool[i].head = pcbPool[i].head.next
+		pcbPool[i].length--
+
+		pcbPool.AppendPCBEle(&h)
+
 	}
 }
 
@@ -18,17 +27,20 @@ func (pcbPool *PCBPool) TimeRotation() {
 // 返回running运行时的指针地址，没有的话为nil
 func (pcbPool *PCBPool) Schedule() *Running {
 	var running Running
-Check:
+
 	for priority := 2; priority >= 0; priority-- {
-		for i := 0; i < len(pcbPool[priority]); i++ {
-			// 所有资源准备就绪
-			if pcbPool[priority][i].detectAllResourceStatus() == true {
+		h := pcbPool[priority].head
+		ok := false
+		for ok == false {
+			if h.Data.detectAllResourceStatus() == true {
 				start := time.Now()
-				pcbPool[priority][i].Status = "running"
-				running = Running{pcbPool[priority][i], start}
+				h.Data.Status = "running"
+				running = Running{h.Data, start}
 				// 从原队列中移除
-				pcbPool[priority] = append(pcbPool[priority][:i], pcbPool[priority][i+1:]...)
-				break Check
+				pcbPool.RemovePCBEle(&(h.Data))
+				ok = true
+			} else {
+				h = h.next
 			}
 		}
 	}
