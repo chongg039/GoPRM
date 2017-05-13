@@ -18,14 +18,28 @@ func InitRCBPool(rs ...RCB) *RCBPool {
 // blocked 队列在分别对应的 resource 中
 
 // Init 创建初始进程和R1，R2，R3，R4四种资源，并返回PCB池和RCB池的地址
-func Init() (*PCBPool, *RCBPool) {
+func Init() (*PCBPool, *RCBPool, *Queue, *Running) {
 	const (
-		level int    = 0
-		name  string = "InitPCB"
+		name   string = "InitPCB"
+		pid    int    = 1024
+		status        = "ready"
+		level  int    = 0
+		cpu    string = "notused"
+		memory string = "notused"
 	)
 
 	// 初始化Init进程
-	initPCB := CreatePCB(name, level)
+	initPCB := &PCB{
+		Name:      name,
+		PID:       1024,
+		Status:    status,
+		Priority:  level,
+		CPUState:  cpu,
+		Memory:    memory,
+		ReqResArr: []RequestResource{},
+		parent:    nil,
+		children:  make([]interface{}, 5),
+	}
 
 	// 初始化PCB池
 	pcbPool := initPCB.InitPCBPool()
@@ -42,5 +56,11 @@ func Init() (*PCBPool, *RCBPool) {
 	// 初始化RCB池
 	rcbPool := InitRCBPool(*R1, *R2, *R3, *R4)
 
-	return pcbPool, rcbPool
+	// 初始化finish队列
+	finish := &Queue{}
+
+	// 调度schedule，将Init进程移到running块中
+	running := pcbPool.Schedule()
+
+	return pcbPool, rcbPool, finish, running
 }

@@ -5,7 +5,16 @@ import "log"
 // 进程有一个写入blocked队列或执行（输出到running队列）的函数
 
 // RequestResource lets process request resources
-func (p *PCB) RequestResource(rcbPool RCBPool, pcbPool PCBPool) (RCBPool, PCBPool) {
+func (p *PCB) RequestResource(rcbPool RCBPool, pcbPool PCBPool, rname ...string) (*RCBPool, *PCBPool) {
+
+	var rs RequestResource
+
+	for i := 0; i < len(rname); i++ {
+		rs.Name = rname[i]
+		rs.OK = false
+		p.ReqResArr = append(p.ReqResArr, rs)
+	}
+
 	for i := 0; i < len(p.ReqResArr); i++ {
 		for j := 0; j < len(rcbPool); j++ {
 
@@ -35,12 +44,12 @@ func (p *PCB) RequestResource(rcbPool RCBPool, pcbPool PCBPool) (RCBPool, PCBPoo
 				p.Status = "blocked"
 				rcbPool[j].BlockedList = append(rcbPool[j].BlockedList, *p)
 				// 从ready队列中移除
-				return rcbPool, pcbPool
+				return &rcbPool, &pcbPool
 			} else {
 				continue
 			}
 		}
 		// 应该设置标志位判断请求是否合法
 	}
-	return rcbPool, pcbPool
+	return &rcbPool, &pcbPool
 }

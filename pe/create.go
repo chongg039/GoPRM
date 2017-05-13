@@ -18,26 +18,15 @@ func CreateRCB(name string, t int) *RCB {
 /*
 CreatePCB means create a process
 */
-func CreatePCB(name string, level int) *PCB {
+func (p *PCB) CreatePCB(name string, level int) *PCB {
 	const (
 		status string = "ready"
 		cpu    string = "notused"
 		memory string = "notused"
-		// files  string = "notused"
 	)
 
 	pid := generateRandomPID()
 
-	// var rs RequestResource
-
-	// for i := 0; i < len(rname); i++ {
-	// 	rs.Name = rname[i]
-	// 	rs.OK = false
-	// 	p.RequestResArr = append(p.RequestResArr, rs) // 添加请求数组应该在request函数中进行
-	// }
-
-	// append new created process to the ready queue
-	// readyqueue = append(readyqueue, *p)
 	return &PCB{
 		Name:      name,
 		PID:       pid,
@@ -46,11 +35,13 @@ func CreatePCB(name string, level int) *PCB {
 		CPUState:  cpu,
 		Memory:    memory,
 		ReqResArr: []RequestResource{},
+		parent:    p,
+		children:  make([]interface{}, 5),
 	}
 }
 
 // InsertSortedQueue replace method "append"
-func (p *PCB) InsertSortedQueue(pcbPool PCBPool) PCBPool {
+func (p *PCB) InsertSortedQueue(pcbPool *PCBPool) *PCBPool {
 
 	pcbPool[p.Priority] = append(pcbPool[p.Priority], *p)
 

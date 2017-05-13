@@ -7,19 +7,23 @@ PCB struct introduction
 */
 type PCB struct {
 	// name
-	Name string `json:"ProcName"`
+	Name string
 	// PID
-	PID int `json:"PID"`
+	PID int
 	// status: ready, running, blocked
-	Status string `json:"Status"`
+	Status string
 	// priority: 0, 1, 2 (Init, User, System)
-	Priority int `json:"Priority"`
+	Priority int
 	// when status is "running" CPU state is "using", others are "not used"
-	CPUState string `json:"CPUState"`
+	CPUState string
 	// when status is "running" memory is "using", others are "not used"
-	Memory string `json:"Memory"`
+	Memory string
 	// ResourceArr means process needed resources
-	ReqResArr []RequestResource `json:"ReqResArr"`
+	ReqResArr []RequestResource
+	// 父节点
+	parent *PCB
+	// 子节点
+	children []interface{}
 }
 
 // Queue of PCB
