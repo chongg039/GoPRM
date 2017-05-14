@@ -23,7 +23,7 @@ type PCB struct {
 	// 父节点
 	parent *PCB
 	// 子节点
-	children []interface{}
+	children *PCB
 }
 
 // PCBEle means node of PCB in PCBLinkList

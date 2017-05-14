@@ -9,9 +9,12 @@ import (
 
 // TimeRotation is used in each priority's ready queue
 func (pcbPool *PCBPool) TimeRotation() {
+	if pcbPool == nil {
+		return
+	}
 	for i := len(pcbPool) - 1; i >= 0; i-- {
 		if pcbPool[i].head == nil {
-			return
+			continue
 		}
 		h := pcbPool[i].head.Data
 
@@ -21,21 +24,29 @@ func (pcbPool *PCBPool) TimeRotation() {
 		pcbPool.AppendPCBEle(&h)
 
 	}
+	return
 }
 
 // Schedule is based on priority 0, 1, 2
 // 返回running运行时的指针地址，没有的话为nil
 func (pcbPool *PCBPool) Schedule() *Running {
-	var running Running
+	running := new(Running)
 
 	for priority := 2; priority >= 0; priority-- {
+		if pcbPool[priority].head == nil {
+			continue
+		}
 		h := pcbPool[priority].head
 		ok := false
 		for ok == false {
 			if h.Data.detectAllResourceStatus() == true {
 				start := time.Now()
-				h.Data.Status = "running"
-				running = Running{h.Data, start}
+				h.Data = PCB{
+					Status:   "running",
+					CPUState: "using",
+					Memory:   "using",
+				}
+				running = &Running{h.Data, start}
 				// 从原队列中移除
 				pcbPool.RemovePCBEle(&(h.Data))
 				ok = true
@@ -44,11 +55,14 @@ func (pcbPool *PCBPool) Schedule() *Running {
 			}
 		}
 	}
-	return &running
+	return running
 }
 
 // 检测进程的所有资源是否都已准备好
 func (p *PCB) detectAllResourceStatus() bool {
+	if len(p.ReqResArr) == 0 {
+		return true
+	}
 	for i := 0; i < len(p.ReqResArr); i++ {
 		if p.ReqResArr[i].OK == false {
 			return false

@@ -36,7 +36,7 @@ func (p *PCB) CreatePCB(name string, level int) *PCB {
 		Memory:    memory,
 		ReqResArr: []RequestResource{},
 		parent:    p,
-		children:  make([]interface{}, 5),
+		children:  nil,
 	}
 }
 
@@ -48,10 +48,13 @@ func (pcbPool *PCBPool) AppendPCBEle(p *PCB) {
 	pcbele.Data = *p
 
 	if pcbPool[p.Priority].head == nil {
-		for pcbPool[p.Priority].head.next != nil {
-			pcbPool[p.Priority].head = pcbPool[p.Priority].head.next
+		pcbPool[p.Priority].head = pcbele
+	} else {
+		var h = pcbPool[p.Priority].head
+		for h.next != nil {
+			h = h.next
 		}
-		pcbPool[p.Priority].head.next = pcbele
+		h.next = pcbele
 	}
 	pcbPool[p.Priority].length++
 
