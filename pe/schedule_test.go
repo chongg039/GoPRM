@@ -32,8 +32,8 @@ func TestPCB_detectAllResourceStatus(t *testing.T) {
 		CPUState  string
 		Memory    string
 		ReqResArr []RequestResource
-		parent    *PCB
-		children  *PCB
+		Parent    *PCB
+		Children  *PCB
 	}
 	tests := []struct {
 		name   string
@@ -50,8 +50,8 @@ func TestPCB_detectAllResourceStatus(t *testing.T) {
 				CPUState:  "notused",
 				Memory:    "notused",
 				ReqResArr: []RequestResource{},
-				parent:    nil,
-				children:  nil,
+				Parent:    nil,
+				Children:  nil,
 			},
 			want: true,
 		},
@@ -66,8 +66,8 @@ func TestPCB_detectAllResourceStatus(t *testing.T) {
 				CPUState:  tt.fields.CPUState,
 				Memory:    tt.fields.Memory,
 				ReqResArr: tt.fields.ReqResArr,
-				parent:    tt.fields.parent,
-				children:  tt.fields.children,
+				Parent:    tt.fields.Parent,
+				Children:  tt.fields.Children,
 			}
 			if got := p.detectAllResourceStatus(); got != tt.want {
 				t.Errorf("PCB.detectAllResourceStatus() = %v, want %v", got, tt.want)
@@ -77,21 +77,23 @@ func TestPCB_detectAllResourceStatus(t *testing.T) {
 }
 
 func TestPCBPool_Schedule(t *testing.T) {
-	var (
-		pcb1, pcb2       *PCB
-		pcb1ele, pcb2ele *PCBEle
-	)
+
+	pcb1 := new(PCB)
+	pcb2 := new(PCB)
+	pcb1ele := new(PCBEle)
+	pcb2ele := new(PCBEle)
+
 	pool := new(PCBPool)
 	pcb1 = &PCB{
 		Name:      "PCB1",
 		PID:       1000,
-		Status:    "running",
+		Status:    "ready",
 		Priority:  2,
 		CPUState:  "notused",
 		Memory:    "notused",
 		ReqResArr: []RequestResource{},
-		parent:    nil,
-		children:  pcb2,
+		Parent:    nil,
+		Children:  pcb2,
 	}
 	pcb2 = &PCB{
 		Name:      "PCB2",
@@ -101,20 +103,30 @@ func TestPCBPool_Schedule(t *testing.T) {
 		CPUState:  "notused",
 		Memory:    "notused",
 		ReqResArr: []RequestResource{},
-		parent:    pcb1,
-		children:  nil,
+		Parent:    pcb1,
+		Children:  nil,
 	}
 
-	pcb1ele = &PCBEle{
-		Data: *pcb1,
-		next: pcb2ele,
-	}
-	pcb2ele = &PCBEle{
-		Data: *pcb2,
-		next: nil,
-	}
-	pool[2].head = pcb1ele
-	pool[2].length = 2
+	rpcb := pcb1
+	rpcb.Status = "running"
+	rpcb.CPUState = "using"
+	rpcb.Memory = "using"
+
+	// 在引用前不分配内存则不会引用的问题怎么解决？
+	// new一个对象创建一个分配了内存的指针，这个对象中的值被初始化为0，
+	// var 定义一个指针对象并不会为它分配一个内存空间，为nil（0x0）
+	// 没有C++中的构造函数，对象的创建一般交给一个全局的创建函数来完成，返回的局部变量地址在函数返回后依然存在
+	pcb1ele.Data = *pcb1
+	pcb1ele.Next = pcb2ele
+
+	pcb2ele.Data = *pcb2
+	pcb2ele.Next = pcb1ele
+
+	pool[2].Head = pcb1ele
+	pool[2].Length = 2
+
+	s := time.Now().Format("2006-01-02 15:04:05")
+	start, _ := time.Parse("2006-01-02 15:04:05", s)
 
 	tests := []struct {
 		name    string
@@ -125,8 +137,8 @@ func TestPCBPool_Schedule(t *testing.T) {
 			name:    "test1",
 			pcbPool: pool,
 			want: &Running{
-				Process: *pcb1,
-				Start:   time.Now(),
+				Process: *rpcb,
+				Start:   start,
 			},
 		},
 	}

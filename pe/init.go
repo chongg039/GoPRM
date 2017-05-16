@@ -37,8 +37,8 @@ func Init() (*PCB, *PCBPool, *RCBPool, *Queue, *Running) {
 		CPUState:  cpu,
 		Memory:    memory,
 		ReqResArr: []RequestResource{},
-		parent:    nil,
-		children:  nil,
+		Parent:    nil,
+		Children:  nil,
 	}
 
 	// 初始化PCB池

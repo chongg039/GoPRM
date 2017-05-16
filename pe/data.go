@@ -1,6 +1,8 @@
 package pe
 
-import "time"
+import (
+	"time"
+)
 
 /*
 PCB struct introduction
@@ -21,21 +23,21 @@ type PCB struct {
 	// ResourceArr means process needed resources
 	ReqResArr []RequestResource
 	// 父节点
-	parent *PCB
+	Parent *PCB
 	// 子节点
-	children *PCB
+	Children *PCB
 }
 
 // PCBEle means node of PCB in PCBLinkList
 type PCBEle struct {
 	Data PCB
-	next *PCBEle
+	Next *PCBEle
 }
 
 // PCBLinkList is a linklist of PCBEle
 type PCBLinkList struct {
-	length int
-	head   *PCBEle
+	Length int
+	Head   *PCBEle
 }
 
 // PCBPool consist of 0, 1, 2 Queue

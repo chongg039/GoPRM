@@ -35,8 +35,8 @@ func (p *PCB) CreatePCB(name string, level int) *PCB {
 		CPUState:  cpu,
 		Memory:    memory,
 		ReqResArr: []RequestResource{},
-		parent:    p,
-		children:  nil,
+		Parent:    p,
+		Children:  nil,
 	}
 }
 
@@ -47,38 +47,51 @@ func (pcbPool *PCBPool) AppendPCBEle(p *PCB) {
 	pcbele = new(PCBEle)
 	pcbele.Data = *p
 
-	if pcbPool[p.Priority].head == nil {
-		pcbPool[p.Priority].head = pcbele
+	if pcbPool[p.Priority].Head == nil {
+		pcbPool[p.Priority].Head = pcbele
 	} else {
-		var h = pcbPool[p.Priority].head
-		for h.next != nil {
-			h = h.next
+		var h = pcbPool[p.Priority].Head
+		for h.Next != nil {
+			h = h.Next
 		}
-		h.next = pcbele
+		h.Next = pcbele
 	}
-	pcbPool[p.Priority].length++
+	pcbPool[p.Priority].Length++
 
 }
 
 // RemovePCBEle remove PCB ele from PCBPool
 func (pcbPool *PCBPool) RemovePCBEle(p *PCB) bool {
 	//n为当前节点，h为前一个节点，初始状态为同一个节点
-	var h, n = pcbPool[p.Priority].head, pcbPool[p.Priority].head
+	// var h, n = pcbPool[p.Priority].Head, pcbPool[p.Priority].Head
 
-	if pcbPool[p.Priority].head == n && n.Data.Name == p.Name {
-		pcbPool[p.Priority].head = pcbPool[p.Priority].head.next
-		pcbPool[p.Priority].length--
+	// if n == pcbPool[p.Priority].Head && n != nil && n.Data.PID == p.PID {
+	// 	pcbPool[p.Priority].Head = pcbPool[p.Priority].Head.Next
+	// 	pcbPool[p.Priority].Length--
+	// 	return true
+	// }
+	// for n != nil {
+	// 	if n.Data.Name == p.Name {
+	// 		//由于有垃圾回收，所以不用考虑释放内存
+	// 		h.Next = n.Next
+	// 		pcbPool[p.Priority].Length--
+	// 		return true
+	// 	}
+	// 	h = n
+	// 	n = n.Next
+	// }
+	// return false
+	if pcbPool[p.Priority].Head == nil {
 		return true
 	}
-	for n != nil {
-		if n.Data.Name == p.Name {
-			//由于有垃圾回收，所以不用考虑释放内存
-			h.next = n.next
-			pcbPool[p.Priority].length--
+	n := pcbPool[p.Priority].Head
+	for n.Next != nil {
+		if n.Next.Data.Name == p.Name {
+			n.Next = n.Next.Next
+			pcbPool[p.Priority].Length--
 			return true
 		}
-		h = n
-		n = n.next
+		n = n.Next
 	}
 	return false
 }

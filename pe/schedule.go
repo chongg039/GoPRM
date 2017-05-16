@@ -13,13 +13,13 @@ func (pcbPool *PCBPool) TimeRotation() {
 		return
 	}
 	for i := len(pcbPool) - 1; i >= 0; i-- {
-		if pcbPool[i].head == nil {
+		if pcbPool[i].Head == nil {
 			continue
 		}
-		h := pcbPool[i].head.Data
+		h := pcbPool[i].Head.Data
 
-		pcbPool[i].head = pcbPool[i].head.next
-		pcbPool[i].length--
+		pcbPool[i].Head = pcbPool[i].Head.Next
+		pcbPool[i].Length--
 
 		pcbPool.AppendPCBEle(&h)
 
@@ -30,30 +30,32 @@ func (pcbPool *PCBPool) TimeRotation() {
 // Schedule is based on priority 0, 1, 2
 // 返回running运行时的指针地址，没有的话为nil
 func (pcbPool *PCBPool) Schedule() *Running {
-	running := new(Running)
+	var running *Running
 
 	for priority := 2; priority >= 0; priority-- {
-		if pcbPool[priority].head == nil {
-			continue
+		if pcbPool[priority].Head == nil {
+			break
 		}
-		h := pcbPool[priority].head
-		ok := false
-		for ok == false {
+		h := pcbPool[priority].Head
+
+		for {
 			if h.Data.detectAllResourceStatus() == true {
-				start := time.Now()
-				h.Data = PCB{
-					Status:   "running",
-					CPUState: "using",
-					Memory:   "using",
-				}
+				s := time.Now().Format("2006-01-02 15:04:05")
+				start, _ := time.Parse("2006-01-02 15:04:05", s)
+				h.Data.Status = "running"
+				h.Data.CPUState = "using"
+				h.Data.Memory = "using"
 				running = &Running{h.Data, start}
 				// 从原队列中移除
-				pcbPool.RemovePCBEle(&(h.Data))
-				ok = true
-			} else {
-				h = h.next
+				judge := pcbPool.RemovePCBEle(&h.Data)
+				if judge == true {
+					break
+				}
+				h = h.Next
 			}
+			h = h.Next
 		}
+
 	}
 	return running
 }
