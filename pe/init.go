@@ -13,12 +13,17 @@ func InitRCBPool(rs ...RCB) *RCBPool {
 	return &rcbPool
 }
 
+// InitRunning create running block when start
+func InitRunning() *PCB {
+	return nil
+}
+
 // 建立 running 输出队列
 
 // blocked 队列在分别对应的 resource 中
 
 // Init 创建初始进程和R1，R2，R3，R4四种资源，并返回PCB池和RCB池的地址
-func Init() (*PCB, *PCBPool, *RCBPool, *Queue, *Running) {
+func Init() (*PCB, *PCBPool, *RCBPool, Queue, *PCB) {
 	const (
 		name   string = "InitPCB"
 		pid    int    = 1024
@@ -56,11 +61,14 @@ func Init() (*PCB, *PCBPool, *RCBPool, *Queue, *Running) {
 	// 初始化RCB池
 	rcbPool := InitRCBPool(*R1, *R2, *R3, *R4)
 
+	// 初始化running块
+	running := InitRunning()
+
 	// 初始化finish队列
-	finish := &Queue{}
+	finish := Queue{}
 
 	// 调度schedule，将Init进程移到running块中
-	running := pcbPool.Schedule()
+	running = pcbPool.Schedule(initPCB)
 
 	return initPCB, pcbPool, rcbPool, finish, running
 }

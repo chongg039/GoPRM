@@ -1,9 +1,5 @@
 package pe
 
-import (
-	"time"
-)
-
 /*
 PCB struct introduction
 */
@@ -25,26 +21,28 @@ type PCB struct {
 	// 父节点
 	Parent *PCB
 	// 子节点
-	Children *PCB
+	Children Queue
+	// 指向链表下一个元素
+	Next *PCB
 }
 
 // PCBEle means node of PCB in PCBLinkList
-type PCBEle struct {
-	Data PCB
-	Next *PCBEle
-}
+// type PCBEle struct {
+// 	Data *PCB
+// 	Next *PCBEle
+// }
 
 // PCBLinkList is a linklist of PCBEle
 type PCBLinkList struct {
 	Length int
-	Head   *PCBEle
+	Head   *PCB
 }
 
 // PCBPool consist of 0, 1, 2 Queue
 type PCBPool [3]PCBLinkList
 
-// Queue consist of finished PCB
-type Queue []PCB
+// Queue consist of finished PCB address
+type Queue []*PCB
 
 // RCB control block
 type RCB struct {
@@ -71,7 +69,7 @@ type RequestResource struct {
 // type RequestResArr []RequestResource
 
 // Running is on behalf of a process which status is "running"
-type Running struct {
-	Process PCB
-	Start   time.Time
-}
+// type Running struct {
+// 	Process *PCB
+// 	// Start   time.Time
+// }

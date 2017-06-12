@@ -15,9 +15,7 @@ func CreateRCB(name string, t int) *RCB {
 	}
 }
 
-/*
-CreatePCB means create a process
-*/
+// CreatePCB means create a process
 func (p *PCB) CreatePCB(name string, level int) *PCB {
 	const (
 		status string = "ready"
@@ -27,7 +25,7 @@ func (p *PCB) CreatePCB(name string, level int) *PCB {
 
 	pid := generateRandomPID()
 
-	return &PCB{
+	np := &PCB{
 		Name:      name,
 		PID:       pid,
 		Status:    status,
@@ -38,23 +36,21 @@ func (p *PCB) CreatePCB(name string, level int) *PCB {
 		Parent:    p,
 		Children:  nil,
 	}
+	p.Children = append(p.Children, np)
+	return np
 }
 
-// AppendPCBEle replace method "append"
+// AppendPCBEle append PCB ele to PCBPool
 func (pcbPool *PCBPool) AppendPCBEle(p *PCB) {
 
-	var pcbele *PCBEle
-	pcbele = new(PCBEle)
-	pcbele.Data = *p
-
 	if pcbPool[p.Priority].Head == nil {
-		pcbPool[p.Priority].Head = pcbele
+		pcbPool[p.Priority].Head = p
 	} else {
 		var h = pcbPool[p.Priority].Head
 		for h.Next != nil {
 			h = h.Next
 		}
-		h.Next = pcbele
+		h.Next = p
 	}
 	pcbPool[p.Priority].Length++
 
@@ -62,36 +58,22 @@ func (pcbPool *PCBPool) AppendPCBEle(p *PCB) {
 
 // RemovePCBEle remove PCB ele from PCBPool
 func (pcbPool *PCBPool) RemovePCBEle(p *PCB) bool {
-	//n为当前节点，h为前一个节点，初始状态为同一个节点
-	// var h, n = pcbPool[p.Priority].Head, pcbPool[p.Priority].Head
-
-	// if n == pcbPool[p.Priority].Head && n != nil && n.Data.PID == p.PID {
-	// 	pcbPool[p.Priority].Head = pcbPool[p.Priority].Head.Next
-	// 	pcbPool[p.Priority].Length--
-	// 	return true
-	// }
-	// for n != nil {
-	// 	if n.Data.Name == p.Name {
-	// 		//由于有垃圾回收，所以不用考虑释放内存
-	// 		h.Next = n.Next
-	// 		pcbPool[p.Priority].Length--
-	// 		return true
-	// 	}
-	// 	h = n
-	// 	n = n.Next
-	// }
-	// return false
 	if pcbPool[p.Priority].Head == nil {
 		return true
 	}
-	n := pcbPool[p.Priority].Head
-	for n.Next != nil {
-		if n.Next.Data.Name == p.Name {
-			n.Next = n.Next.Next
+	// n := pcbPool[p.Priority].Head
+	if pcbPool[p.Priority].Head.Next == nil && pcbPool[p.Priority].Head.Name == p.Name {
+		pcbPool[p.Priority].Length--
+		pcbPool[p.Priority].Head = nil
+		return true
+	}
+	for pcbPool[p.Priority].Head.Next != nil {
+		if pcbPool[p.Priority].Head.Name == p.Name {
+			pcbPool[p.Priority].Head = pcbPool[p.Priority].Head.Next
 			pcbPool[p.Priority].Length--
 			return true
 		}
-		n = n.Next
+		pcbPool[p.Priority].Head = pcbPool[p.Priority].Head.Next
 	}
 	return false
 }
@@ -104,4 +86,12 @@ func generateRandomPID() (pid int) {
 	rand.Seed(time.Now().Unix())
 	pid = rand.Intn(max-min) + min
 	return
+}
+
+// FindPCB 通过名字来查询对应的PCB地址
+func (p *PCB) FindPCB(s string) *PCB {
+	if p != nil && p.Name == s {
+		return p
+	}
+	return nil
 }

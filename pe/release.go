@@ -1,7 +1,6 @@
 package pe
 
 import (
-	"log"
 	"time"
 )
 
@@ -12,8 +11,17 @@ func (p *PCB) running() {
 
 // 判定资源池中是否有某进程仍在某资源的blocked队列中
 func (rcbPool *RCBPool) detectBlockedQueue(p *PCB) bool {
+	if len(p.ReqResArr) == 0 {
+		return false
+	}
 	for i := 0; i < len(p.ReqResArr); i++ {
+		if len(*rcbPool) == 0 {
+			return false
+		}
 		for j := 0; j < len(*rcbPool); j++ {
+			if len((*rcbPool)[j].BlockedList) == 0 {
+				continue
+			}
 			for k := 0; k < len((*rcbPool)[j].BlockedList); k++ {
 				if p.Name == (*rcbPool)[j].BlockedList[k].Name {
 					return true
@@ -36,33 +44,27 @@ func (rcbPool *RCBPool) detectBlockedQueue(p *PCB) bool {
 
 // ReleaseResource should be used when process is already running
 // 每次释放资源resource检测自身是否可用（>0），并从blocked队列中取出放入running
-func (p *PCB) ReleaseResource(rcbPool *RCBPool, finishedQueue *Queue) (*RCBPool, *Queue) {
+func (p *PCB) ReleaseResource(rcbPool *RCBPool, pcbPool *PCBPool) (*RCBPool, *PCBPool) {
 	for i := 0; i < len(p.ReqResArr); i++ {
-		for j := 0; j < len(*rcbPool); j++ {
-			if p.ReqResArr[i].Name == (*rcbPool)[j].Name {
-				(*rcbPool)[j].Available++
-				log.Printf("%s Already release resource, %s", p.Name, (*rcbPool)[j].Name)
+		if p.ReqResArr[i].OK == true {
+			p.ReqResArr[i].OK = false
+			for j := 0; j < len(*rcbPool); j++ {
+				if (*rcbPool)[j].Name == p.ReqResArr[i].Name {
+					(*rcbPool)[j].Available++
 
-				if i == len(p.ReqResArr)-1 {
-					p.Status = "finished"
-					*finishedQueue = append(*finishedQueue, *p)
-					log.Printf("Process %s has already finished, put it to finished queue", p.Name)
-
-					// 检测该blocked队列
-					if (*rcbPool)[j].Available > 0 && len((*rcbPool)[j].BlockedList) > 0 {
-						(*rcbPool)[j].Available--
-						//　检测所有blocked队列
-						judge := rcbPool.detectBlockedQueue(p)
-						if judge == false {
-							(*rcbPool)[j].BlockedList[0].Status = "finished"
-							*finishedQueue = append(*finishedQueue, (*rcbPool)[j].BlockedList[0])
-							(*rcbPool)[j].BlockedList = (*rcbPool)[j].BlockedList[1:]
-						}
+					// 检测blocked队列，让第一个执行request
+					if len((*rcbPool)[j].BlockedList) != 0 {
+						h := (*rcbPool)[j].BlockedList[0]
+						s := []string{}
+						rcbPool, pcbPool = h.RequestResource(rcbPool, pcbPool, s...)
+						break
 					}
-					return rcbPool, finishedQueue
+					break
 				}
+				continue
 			}
 		}
 	}
-	return rcbPool, finishedQueue
+	p.ReqResArr = []RequestResource{}
+	return rcbPool, pcbPool
 }

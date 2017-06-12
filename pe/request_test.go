@@ -6,17 +6,31 @@ import (
 )
 
 func TestPCB_RequestResource(t *testing.T) {
-	type fields struct {
-		Name      string
-		PID       int
-		Status    string
-		Priority  int
-		CPUState  string
-		Memory    string
-		ReqResArr []RequestResource
-		Parent    *PCB
-		Children  *PCB
+	pcbele := new(PCBEle)
+	pcbpool := new(PCBPool)
+
+	rcbpool := new(RCBPool)
+	r1 := &RCB{
+		Name:        "R1",
+		Total:       1,
+		Available:   1,
+		BlockedList: Queue{},
 	}
+	pcb := &PCB{
+		Name:      "testPCB",
+		PID:       1000,
+		Status:    "ready",
+		Priority:  1,
+		CPUState:  "notused",
+		Memory:    "notused",
+		ReqResArr: []RequestResource{},
+		Parent:    nil,
+		Children:  nil,
+	}
+	pcbele.Data = pcb
+	pcbpool[1].Head = pcbele
+	*rcbpool = append(*rcbpool, *r1)
+
 	type args struct {
 		rcbPool *RCBPool
 		pcbPool *PCBPool
@@ -24,12 +38,22 @@ func TestPCB_RequestResource(t *testing.T) {
 	}
 	tests := []struct {
 		name   string
-		fields fields
+		fields PCB
 		args   args
 		want   *RCBPool
 		want1  *PCBPool
 	}{
-	// TODO: Add test cases.
+		{
+			name:   "test",
+			fields: *pcb,
+			args: args{
+				rcbPool: rcbpool,
+				pcbPool: pcbpool,
+				rname:   []string{"R1"},
+			},
+			want:  rcbpool,
+			want1: pcbpool,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

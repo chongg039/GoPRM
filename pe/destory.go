@@ -1,25 +1,42 @@
 package pe
 
-/*
-DestoryProcess can destory process no matter the status running/ready/blocked
-*/
-// func (p *Process) DestoryProcess() (q Queue) {
-// 	if p.Status == "running" {
-// 		log.Printf("The running process %d has been destory", p.PID)
-// 		return nil
-// 	}
-// 	q = remove(*p, q)
-// 	log.Printf("The %s process %d has been destory", p.Status, p.PID)
-// 	return
-// }
+import (
+	"log"
+)
 
-// func remove(p Process, s Queue) (q Queue) {
-// 	// return append(q[:i], q[i+1:]...)
-// 	for k, v := range s {
-// 		if v == p {
-// 			s = append(s[:k], s[k+1:]...)
-// 		}
-// 	}
-// 	q = s
-// 	return
-// }
+// DestoryPCB can destory process no matter the status running
+func (pcbPool *PCBPool) DestoryPCB(rcbPool *RCBPool, p *PCB, finish Queue) (*RCBPool, *PCB, Queue) {
+	if p.Status != "running" {
+		log.Println("only running PCB can be destoried! exit")
+		return rcbPool, p, finish
+	}
+	// 归还资源
+	rcbPool, pcbPool = p.ReleaseResource(rcbPool, pcbPool)
+	// 暂存running
+	temp := p
+	p = nil
+
+	// 原running和其子PCB压入finish
+	finish = append(finish, temp)
+	for i := 0; i < len(temp.Children); i++ {
+		tempc := temp.Children[i]
+		// 在PCBPool中删除
+		jug := pcbPool.RemovePCBEle(tempc)
+		// 删除失败
+		if jug == false {
+			log.Println("Del failed! exit")
+			return rcbPool, p, finish
+		}
+		finish = append(finish, tempc)
+		//递归调用删除
+		if len(tempc.Children) != 0 {
+			for j := 0; j < len(tempc.Children); j++ {
+				rcbPool, p, finish = pcbPool.DestoryPCB(rcbPool, tempc.Children[j], finish)
+			}
+		}
+	}
+	// 调度等待队列进入running
+	p = pcbPool.Schedule(p)
+	log.Printf("OK, PCB %p and its children has been destoried!", temp)
+	return rcbPool, p, finish
+}
